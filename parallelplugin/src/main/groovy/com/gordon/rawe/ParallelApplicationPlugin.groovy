@@ -15,5 +15,4 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
             }
         }
     }
-
 }

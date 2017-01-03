@@ -2,15 +2,15 @@ package com.gordon.rawe.TaskNames
 
 public class TaskNames {
     /*library task names*/
-    public static final String AAPT = "aaptCompile";
-    public static final String JAVA_COMPILE = "javaCompile";
-    public static final String COPY_SO_OUTPUT = "copySoOutput";
-    public static final String OBFUSCATE = "obfuscate";
-    public static final String DEX_COMPILE = "dexCompile";
-    public static final String BUNDLE_COMPILE = "bundleCompile";
-    public static final String CONFIG_DIRS = "configDirs";
-    public static final String CONFIG_LIBS = "configLibs";
-    public static final String CONFIG_PARENT = "configParent";
+    public static final String AAPT = "aaptParallelCompile";
+    public static final String JAVA_COMPILE = "javaParallelCompile";
+    public static final String COPY_SO_OUTPUT = "copyParallelSoOutput";
+    public static final String OBFUSCATE = "obfuscateParallel";
+    public static final String DEX_COMPILE = "dexParallelCompile";
+    public static final String BUNDLE_COMPILE = "bundleParallelCompile";
+    public static final String CONFIG_DIRS = "configParallelDirs";
+    public static final String CONFIG_LIBS = "configParallelLibs";
+    public static final String CONFIG_PARENT = "configParallelParent";
 
 
 }

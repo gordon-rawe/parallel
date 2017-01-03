@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'parallel.library'
 
 libraryOptions{
-    parentModuleName = ':application'
+
 }
 
 android {
