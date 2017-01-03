@@ -1,6 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'parallel.library'
 
+libraryOptions{
+    parentModuleName = ':application'
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
