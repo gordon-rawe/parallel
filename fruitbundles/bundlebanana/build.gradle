@@ -3,6 +3,7 @@ apply plugin: 'parallel.library'
 
 libraryOptions{
     packageName = "com.gordon.rawe.bundlebanana"
+    parentModuleName = ":fruitbundles:bundleapple"
 }
 
 android {
