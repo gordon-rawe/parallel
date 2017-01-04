@@ -9,6 +9,7 @@ import org.gradle.api.tasks.Exec
 
 public class ParallelLibraryPlugin implements Plugin<Project> {
     private ParallelLibraryOptions libraryOptions;
+    private String packageName;
 
     private Project parentProject = null
     private String parentPackageName = null
@@ -24,7 +25,9 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
 
         libraryOptions = project.extensions.create(ParallelLibraryOptions.optionsName, ParallelLibraryOptions.class);
         project.afterEvaluate {
+            libraryOptions.initOptionsAfterEvaluate(project)
             configureParentModule(project)
+
         }
     }
 

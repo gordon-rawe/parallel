@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'parallel.library'
 
-libraryOptions{
-
+libraryOptions {
+    packageName = "com.gordon.rawe.bundleapple"
 }
 
 android {

@@ -6,7 +6,7 @@ ext{
 }
 
 parallelOptions {
-    enabled = project.parallelEnabled
+    enabled = parallelEnabled
     moduleConfigFilePath = "$rootDir/apk_module_config.xml"
 }
 

@@ -6,10 +6,11 @@ import org.gradle.api.Project
 public class ParallelLibraryOptions {
     public static final String optionsName = "libraryOptions"
 
+    /** mandatory */
     public String packageName;
     public String moduleProguardRulesFilePath;
 
-    //nullAble
+    /** optional */
     public String libsDirPath;
     public String sourceDirPath;
     public String assetsDirPath;
@@ -19,15 +20,26 @@ public class ParallelLibraryOptions {
     public String parentModuleName;
     public String soName;
 
-    public
-    static void initLibraryExtensionAfterEvaluate(ParallelLibraryOptions libraryExtension, Project libraryProject) {
-        libraryExtension.libsDirPath = Helper.isInvalid(libraryExtension.libsDirPath) ? "$libraryProject.projectDir/libs" : libraryExtension.libsDirPath
-        libraryExtension.sourceDirPath = Helper.isInvalid(libraryExtension.sourceDirPath) ? "$libraryProject.projectDir/src/main/java" : libraryExtension.sourceDirPath
-        libraryExtension.resourceDirPath = Helper.isInvalid(libraryExtension.resourceDirPath) ? "$libraryProject.projectDir/src/main/res" : libraryExtension.resourceDirPath
-        libraryExtension.assetsDirPath = Helper.isInvalid(libraryExtension.assetsDirPath) ? "$libraryProject.projectDir/src/main/assets" : libraryExtension.assetsDirPath
-        libraryExtension.androidManifestFilePath = Helper.isInvalid(libraryExtension.androidManifestFilePath) ? "$libraryProject.projectDir/src/main/AndroidManifest.xml" : libraryExtension.androidManifestFilePath
-        libraryExtension.soName = libraryExtension.packageName.replace('.', '_')
+    public void initOptionsAfterEvaluate(Project libraryProject) {
+        libsDirPath = Helper.isInvalid(libsDirPath) ? "$libraryProject.projectDir/libs" : libsDirPath
+        sourceDirPath = Helper.isInvalid(sourceDirPath) ? "$libraryProject.projectDir/src/main/java" : sourceDirPath
+        resourceDirPath = Helper.isInvalid(resourceDirPath) ? "$libraryProject.projectDir/src/main/res" : resourceDirPath
+        assetsDirPath = Helper.isInvalid(assetsDirPath) ? "$libraryProject.projectDir/src/main/assets" : assetsDirPath
+        androidManifestFilePath = Helper.isInvalid(androidManifestFilePath) ? "$libraryProject.projectDir/src/main/AndroidManifest.xml" : androidManifestFilePath
+        soName = packageName.replace('.', '_')
+        println this
+    }
 
-        println("$libraryProject.path apply dynamicLibrary initLibraryExtensionAfterEvaluate:\n")
+    @Override
+    String toString() {
+        return "packageName\t$packageName\n" +
+                "moduleProguardRulesFilePath\t$moduleProguardRulesFilePath\n" +
+                "libsDirPath\t$libsDirPath\n" +
+                "sourceDirPath\t$sourceDirPath\n" +
+                "assetsDirPath\t$assetsDirPath\n" +
+                "resourceDirPath\t$resourceDirPath\n" +
+                "androidManifestFilePath\t$androidManifestFilePath\n" +
+                "assetsDirPath\t$parentModuleName\n" +
+                "resourceDirPath\t$soName\n"
     }
 }

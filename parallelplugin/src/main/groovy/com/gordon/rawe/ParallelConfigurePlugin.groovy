@@ -9,7 +9,7 @@ public class ParallelConfigurePlugin implements Plugin<Project> {
     void apply(Project project) {
         ParallelSharedOptions options = project.extensions.create(ParallelSharedOptions.optionsName, ParallelSharedOptions.class)
         project.afterEvaluate {
-            options.initBasicOptions(project)
+            options.initOptions(project)
         }
     }
 }

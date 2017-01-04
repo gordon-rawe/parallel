@@ -48,7 +48,7 @@ public class ParallelSharedOptions {
     public String androidJar;
     public String apacheJar;
 
-    public void initBasicOptions(Project project) {
+    public void initOptions(Project project) {
 
         /**assign values*/
         buildOutputName = Helper.isInvalid(buildOutputName) ? Default.DEFAULT_BUILD_OUTPUT_NAME : buildOutputName
