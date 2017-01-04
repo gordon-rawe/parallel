@@ -35,6 +35,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         println "$project.path:configureParentModule:parentModuleName==$libraryOptions.parentModuleName"
         if (!Helper.isInvalid(libraryOptions.parentModuleName)) {
             parentProject = project.project(libraryOptions.parentModuleName)
+            println parentProject == null ? "null something" : parentProject.path + "something"
             project.evaluationDependsOn(parentProject.path)
 
             if (parentProject != null) {
