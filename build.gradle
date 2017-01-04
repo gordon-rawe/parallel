@@ -1,6 +1,15 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 apply plugin: 'parallel.configure'
 
+ext{
+    parallelEnabled = true
+}
+
+parallelOptions {
+    enabled = project.parallelEnabled
+    moduleConfigFilePath = "$rootDir/apk_module_config.xml"
+}
+
 buildscript {
     repositories {
         jcenter()

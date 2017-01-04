@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    0x00是共享资源
+    0x01是Android系统资源，
+    0x02是WebView资源(Android 5.0新增)
+    0x7f这个一般不动
+    0x10到0x7e的都可以用
+-->
+<ApkModules>
+    <Module packageName="com.gordon.rawe.bundleapple" resourceId="0x7d" />
+    <Module packageName="com.gordon.rawe.bundleapple" resourceId="0x7e" />
+</ApkModules>

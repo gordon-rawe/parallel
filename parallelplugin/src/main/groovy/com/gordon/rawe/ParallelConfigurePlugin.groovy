@@ -7,12 +7,9 @@ public class ParallelConfigurePlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        ParallelSharedOptions options = project.extensions.create(ParallelSharedOptions.optionsName, ParallelSharedOptions.class)
         project.afterEvaluate {
-            project.task("show") << {
-                println project.buildDir
-                println project.project.buildDir
-                println project.path
-            }
+            options.initBasicOptions(project)
         }
     }
 }

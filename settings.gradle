@@ -1,1 +1,6 @@
-include ':application', ':sharedlibs', ':fruitbundles:bundleapple', ':fruitbundles:bundlebanana', ':parallelplugin'
+if (true) {
+    include ':application', ':sharedlibs', ':fruitbundles:bundleapple', ':fruitbundles:bundlebanana', ':parallelplugin'
+} else {
+    include ':parallelplugin'
+}
+

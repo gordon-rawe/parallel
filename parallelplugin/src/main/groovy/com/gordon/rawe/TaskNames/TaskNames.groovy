@@ -11,6 +11,7 @@ public class TaskNames {
     public static final String CONFIG_DIRS = "configParallelDirs";
     public static final String CONFIG_LIBS = "configParallelLibs";
     public static final String CONFIG_PARENT = "configParallelParent";
+    public static final String COPY_AAPT = "copyParallelAapt";
 
 
 }
