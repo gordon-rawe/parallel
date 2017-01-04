@@ -5,16 +5,23 @@ import org.gradle.api.file.ConfigurableFileCollection
 
 public class ParallelApplicationOptions {
 
-    public String keystore;
-    public String keyAlias;
-    public String keyPassword;
-    public String storePassword;
+    public static final String optionsName = "applicationOptions"
 
+    /** mandatory */
+    public String packageName
+
+    /** optional */
+    public String keystore
+    public String keyAlias
+    public String keyPassword
+    public String storePassword
 
     //inner
     public ConfigurableFileCollection classpath
 
-    public void initBasicOptions(Project project) {
+    public void initOptions(Project project) {
+        ParallelSharedOptions.reference.applicationPackageName = packageName
+        ParallelSharedOptions.reference.applicationBuildDir = "$project.buildDir/generated/source/r/release/" + packageName.replace('.', '/') + "/R.java"
 //        applicationExtension.releaseBaseApkName = MTextUtil.isEmpty(applicationExtension.releaseBaseApkName) ? "$applicationProject.name-release.apk" : applicationExtension.releaseBaseApkName
 //        applicationExtension.releaseBaseApkPath = MTextUtil.isEmpty(applicationExtension.releaseBaseApkPath) ? "$applicationProject.buildDir/outputs/apk/$applicationExtension.releaseBaseApkName" : applicationExtension.releaseBaseApkPath
 //        applicationExtension.buildOutputName = MTextUtil.isEmpty(applicationExtension.buildOutputName) ? "build-output" : applicationExtension.buildOutputName

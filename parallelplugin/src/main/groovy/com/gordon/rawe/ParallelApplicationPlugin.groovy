@@ -7,12 +7,7 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.afterEvaluate {
-            project.task("show") << {
-                println project.buildDir
-                println project.project.buildDir
-                println project.path
-            }
-        }
+        ParallelApplicationOptions applicationOptions = project.extensions.create(ParallelApplicationOptions.optionsName, ParallelApplicationOptions.class)
+        applicationOptions.initOptions(project)
     }
 }

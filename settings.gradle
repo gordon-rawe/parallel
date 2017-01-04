@@ -3,4 +3,3 @@ if (true) {
 } else {
     include ':parallelplugin'
 }
-
