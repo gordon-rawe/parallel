@@ -5,12 +5,15 @@ import com.gordon.rawe.utils.Helper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.ConfigurableFileTree
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.compile.JavaCompile
+import proguard.gradle.ProGuardTask
 
 public class ParallelLibraryPlugin implements Plugin<Project> {
     private ParallelLibraryOptions libraryOptions;
-    private String packageName;
 
     private Project parentProject = null
     private String parentPackageName = null
@@ -18,7 +21,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
     private String parentRFile = null
     private ParallelLibraryOptions parentOptions = null
 
-    private ConfigurableFileTree libJars = null;
+    private ConfigurableFileTree libJars = null
 
 
     @Override
@@ -31,6 +34,9 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
             configureInitTask(project)
             configureLibs(project)
             configureAaptRelease(project)
+            configureCompileReleaseTask(project)
+            configureCopySOOutputsTask(project)
+            configureObfuscateReleaseTask(project)
         }
     }
 
@@ -39,7 +45,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         if (libJars != null && !libJars.isEmpty()) {
             project.logger.info("$project.path:------------------------------------------------------------------------------------")
             libJars.each {
-                project.logger.info("$project.path:configureLibs:libJars:" + it.path)
+                project.logger.info("$project.path configureLibs libJars " + it.path)
             }
             project.logger.info("$project.path:------------------------------------------------------------------------------------")
         }
@@ -69,7 +75,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
     }
 
     private void configureInitTask(Project project) {
-        project.logger.info("$project.path configureInitTask start...")
+        project.logger.info("$project.path configParallelDirs start...")
         Task configDirs = project.tasks.create(TaskNames.CONFIG_DIRS, Task.class);
 
         configDirs.outputs.dir "$project.buildDir/gen/r"
@@ -88,10 +94,10 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         configDirs << {
             project.logger.info("$project.path making dirs start...")
 
-            new File(MApplicationExtension.instance.buildOutputPath).mkdirs()
-            new File(MApplicationExtension.instance.buildOutputPath, 'remoteApk').mkdirs()
-            new File(MApplicationExtension.instance.buildOutputPath, "jni/armeabi/").mkdirs()
-            new File(MApplicationExtension.instance.buildOutputPath, "jni/x86/").mkdirs()
+            new File(ParallelSharedOptions.reference.buildOutputPath).mkdirs()
+            new File(ParallelSharedOptions.reference.buildOutputPath, 'remoteApk').mkdirs()
+            new File(ParallelSharedOptions.reference.buildOutputPath, "jni/armeabi/").mkdirs()
+            new File(ParallelSharedOptions.reference.buildOutputPath, "jni/x86/").mkdirs()
 
             project.buildDir.mkdirs()
             new File(project.buildDir, 'gen/r').mkdirs()
@@ -103,17 +109,17 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
 
             project.logger.info("$project.path making dirs end...")
         }
-//        Set<Task> dependTasks = project.rootProject.getTasksByName("dynamicAssembleRelease", true)
-//
-//        if (parentProject != null)
-//            configDirs.dependsOn(dependTasks, "$parentProject.path:dynamicBundleRelease")
-//        else
-//            configDirs.dependsOn(dependTasks)
-//
-//        configDirs.getDependsOn().each {
-//            println "$project.path:dynamicInitDirs:findDependency: " + it.toString()
-//        }
-//        project.logger.info("$project.path:configureInitTask:end")
+        Set<Task> dependTasks = project.rootProject.getTasksByName(TaskNames.ASSEMBLE_RELEASE, true)
+
+        if (parentProject != null)
+            configDirs.dependsOn(dependTasks, "$parentProject.path:$TaskNames.BUNDLE_COMPILE")
+        else
+            configDirs.dependsOn(dependTasks)
+
+        configDirs.getDependsOn().each {
+            println "$project.path configParallelDirs findDependency: " + it.toString()
+        }
+        project.logger.info("$project.path configureInitTask end...")
     }
 
     public void configureAaptRelease(Project project) {
@@ -133,9 +139,9 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         if (parentProject != null) {
             inputRFile = parentRFile
             packageName = "${parentPackageName}-$packageName"
+            println "$project.path $TaskNames.AAPT inputRFile is $inputRFile"
+            println "$project.path $TaskNames.AAPT packageName is $packageName"
         }
-
-        println "$project.path dynamicAaptRelease packageName $packageName"
 
         aaptTask.inputs.file inputRFile
         aaptTask.outputs.dir "$project.buildDir/gen/r"
@@ -143,7 +149,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         aaptTask.outputs.file "$project.buildDir/intermediates/res/aapt-rules.txt"
 
         aaptTask.doFirst {
-            project.logger.info("$project.path:dynamicAaptRelease:doFirst")
+            project.logger.info("$project.path configure $TaskNames.AAPT start...")
 
             workingDir project.buildDir
             executable ParallelSharedOptions.reference.aapt
@@ -172,8 +178,10 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
             argv << libraryOptions.androidManifestFilePath  //指定manifest文件
             argv << '-S'
             argv << libraryOptions.resourceDirPath          //res目录
-            argv << '-A'
-            argv << libraryOptions.assetsDirPath            //assets目录
+            if (new File(libraryOptions.assetsDirPath).exists()) {
+                argv << '-A'
+                argv << libraryOptions.assetsDirPath            //assets目录
+            }
             argv << '-m'        //make package directories under location specified by -J
             argv << '-J'
             argv << "$project.buildDir/gen/r"         //哪里输出R.java定义
@@ -195,6 +203,103 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
             args = argv
         }
         aaptTask.dependsOn TaskNames.CONFIG_DIRS
-        project.logger.info("$project.path configure $TaskNames.AAPT :end")
+        project.logger.info("$project.path configure $TaskNames.AAPT end...")
+    }
+
+    private ConfigurableFileCollection getClasspath(Project project) {
+        println "libjars " + libJars == null
+        println "libjars" + ParallelSharedOptions.reference.classpath == null
+        assert ParallelSharedOptions.reference.classpath != null && !ParallelSharedOptions.reference.classpath.isEmpty(), "base-classpath is null or empty!"
+        ConfigurableFileCollection fileCollection = project.files(ParallelSharedOptions.reference.classpath)
+
+        if (libJars != null && !libJars.isEmpty())
+            fileCollection = project.files(ParallelSharedOptions.reference.classpath, libJars)
+        if (!Helper.isInvalid(parentModuleJar))
+            fileCollection = project.files(ParallelSharedOptions.reference.classpath, libJars, parentModuleJar)
+        return fileCollection
+    }
+
+    private void configureCompileReleaseTask(Project project) {
+        try {
+            project.logger.info("$project.path configureCompileReleaseTask start...")
+            JavaCompile javaCompile = project.tasks.create(TaskNames.JAVA_COMPILE, JavaCompile.class)
+            javaCompile.inputs.files project.fileTree(libraryOptions.libsDirPath).include('*.jar')
+            javaCompile.inputs.files project.fileTree(libraryOptions.sourceDirPath).include('**/*.java')
+            javaCompile.inputs.files project.fileTree("$project.buildDir/gen/r").include('**/*.java')
+            javaCompile.inputs.file ParallelSharedOptions.reference.androidJar
+            javaCompile.inputs.file "$ParallelSharedOptions.reference.applicationBuildDir/intermediates/classes-proguard/release/classes.jar"
+            javaCompile.inputs.file "$project.buildDir/intermediates/res/resources.zip"
+            javaCompile.inputs.file "$project.buildDir/intermediates/res/aapt-rules.txt"
+            javaCompile.inputs.dir "$project.buildDir/gen/r"
+            javaCompile.outputs.dir "$project.buildDir/intermediates/classes"
+
+            if (!Helper.isInvalid(parentModuleJar))
+                javaCompile.inputs.file parentModuleJar
+
+            javaCompile.setClasspath(getClasspath(project))
+
+            //必须设置，否则报错
+            //https://docs.gradle.org/current/dsl/org.gradle.api.tasks.compile.JavaCompile.html Properties of JavaCompile
+            //The character encoding to be used when reading source files. Defaults to null, in which case the platform default encoding will be used.
+            javaCompile.options.encoding = 'UTF-8'
+            javaCompile.setSourceCompatibility(ParallelSharedOptions.reference.javaCompileVersion)
+            javaCompile.setTargetCompatibility(ParallelSharedOptions.reference.javaCompileVersion)
+            javaCompile.setDependencyCacheDir(project.file("$project.buildDir/dependency-cache"))
+            javaCompile.setDestinationDir(project.file("$project.buildDir/intermediates/classes"))
+            javaCompile.source(
+                    project.fileTree(libraryOptions.sourceDirPath).include('**/*.java'),
+                    project.fileTree("$project.buildDir/gen/r").include('**/*.java')
+            )
+            javaCompile.dependsOn TaskNames.AAPT
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
+        project.logger.info("$project.path configure $TaskNames.AAPT end")
+    }
+
+    private static void configureCopySOOutputsTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.JAVA_COMPILE start...")
+        Copy copy = project.tasks.create(TaskNames.COPY_SO_OUTPUT, Copy.class);
+        String subPath = project.buildDir.getParent()
+        copy.inputs.dir "$subPath/libs/armeabi/"
+        copy.inputs.dir "$subPath/libs/x86/"
+        copy.outputs.dir "$ParallelSharedOptions.reference.buildOutputPath/jni/armeabi/"
+        copy.outputs.dir "$ParallelSharedOptions.reference.buildOutputPath/jni/x86/"
+        copy.setDescription("copy so fils to $ParallelSharedOptions.reference.buildOutputPath")
+        copy.from("$subPath/libs/armeabi/").into("$ParallelSharedOptions.reference.buildOutputPath/jni/armeabi/")
+        copy.from("$subPath/libs/x86/").into("$ParallelSharedOptions.reference.buildOutputPath/jni/x86/")
+        copy.dependsOn TaskNames.JAVA_COMPILE
+        project.logger.info("$project.path configure $TaskNames.JAVA_COMPILE end...")
+    }
+
+    private void configureObfuscateReleaseTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.OBFUSCATE start...")
+        ProGuardTask proGuard = project.tasks.create(TaskNames.OBFUSCATE, ProGuardTask)
+
+        proGuard.inputs.file ParallelSharedOptions.reference.androidJar
+        proGuard.inputs.file "$project.buildDir/intermediates/res/resources.zip"
+        proGuard.inputs.file "$project.buildDir/intermediates/res/aapt-rules.txt"
+        proGuard.inputs.file libraryOptions.moduleProguardRulesFilePath
+        proGuard.inputs.file "$ParallelSharedOptions.reference.applicationBuildDir/intermediates/classes-proguard/release/classes.jar"
+        proGuard.inputs.files project.fileTree(libraryOptions.libsDirPath).include('*.jar')
+        proGuard.inputs.files project.fileTree("$project.buildDir/gen/r").include('**/*.java')
+        proGuard.inputs.dir "$project.buildDir/intermediates/classes"
+        proGuard.outputs.file "$project.buildDir/intermediates/classes-obfuscated/classes-obfuscated.jar"
+        proGuard.outputs.file "$ParallelSharedOptions.reference.buildOutputPath/$libraryOptions.soName-mapping.txt"
+        if (parentModuleJar != null)
+            proGuard.inputs.file parentModuleJar
+
+        proGuard.injars("$project.buildDir/intermediates/classes")
+        File libDir = new File(libraryOptions.libsDirPath)
+        if (!libDir.exists()) libDir.mkdirs()
+        proGuard.injars(project.fileTree(libraryOptions.libsDirPath).include('*.jar'))
+        proGuard.outjars("$project.buildDir/intermediates/classes-obfuscated/classes-obfuscated.jar")
+
+        proGuard.configuration(libraryOptions.moduleProguardRulesFilePath)
+        proGuard.configuration("$project.buildDir/intermediates/res/aapt-rules.txt")
+
+        proGuard.libraryjars(getClasspath(project))
+        proGuard.dependsOn TaskNames.COPY_SO_OUTPUT
+        project.logger.info("$project.path configure $TaskNames.OBFUSCATE end...")
     }
 }

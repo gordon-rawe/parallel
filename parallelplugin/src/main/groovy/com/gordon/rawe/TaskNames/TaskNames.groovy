@@ -13,5 +13,6 @@ public class TaskNames {
     public static final String CONFIG_PARENT = "configParallelParent";
     public static final String COPY_AAPT = "copyParallelAapt";
 
-
+    /*application task names*/
+    public static final String ASSEMBLE_RELEASE = "parallelAssembleRelease";
 }

@@ -3,6 +3,7 @@ apply plugin: 'parallel.library'
 
 libraryOptions {
     packageName = "com.gordon.rawe.bundleapple"
+    moduleProguardRulesFilePath = "$rootDir/sub-project-proguard-rules.pro"
 }
 
 android {

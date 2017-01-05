@@ -4,12 +4,13 @@ import com.gordon.rawe.TaskNames.TaskNames
 import com.gordon.rawe.utils.Helper
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.Copy
 
 public class ParallelSharedOptions {
 
-    public static ParallelSharedOptions reference;
+    public static ParallelSharedOptions reference
 
     public ParallelSharedOptions() {
         reference = this;
@@ -18,35 +19,38 @@ public class ParallelSharedOptions {
     public static final String optionsName = "parallelOptions"
 
     public static class Default {
-        public static final int DEFAULT_TARGET_SDK_VERSION = 22;
-        public static final String DEFAULT_BUILD_TOOLS_VERSION = "25.0.2";
-        public static final String DEFAULT_SUPPORT_LIB_VERSION = "25.1.0";
-        public static final String DEFAULT_JAVA_COMPILE_VERSION = "1.7";
-        public static final String DEFAULT_BUILD_OUTPUT_NAME = "build-output";
-        public static final String DEFAULT_BUILD_OUTPUT_PREFIX = "parallel";
-        public static final String DEFAULT_BASE_APK_SUFFIX = "-base-release.apk";
+        public static final int DEFAULT_TARGET_SDK_VERSION = 22
+        public static final String DEFAULT_BUILD_TOOLS_VERSION = "25.0.2"
+        public static final String DEFAULT_SUPPORT_LIB_VERSION = "25.1.0"
+        public static final String DEFAULT_JAVA_COMPILE_VERSION = "1.7"
+        public static final String DEFAULT_BUILD_OUTPUT_NAME = "build-output"
+        public static final String DEFAULT_BUILD_OUTPUT_PREFIX = "parallel"
+        public static final String DEFAULT_BASE_APK_SUFFIX = "-base-release.apk"
     }
 
     /** mandatory */
-    public String moduleConfigFilePath;
-    public String applicationPackageName;
-    public String applicationBuildDir;
+    public String moduleConfigFilePath
+    public String applicationPackageName
+    public String applicationBuildDir
 
     /** optional */
     public String enabled = true;
-    public int targetSdkVersion = Default.DEFAULT_TARGET_SDK_VERSION;//23(Android 6.0) 以下 不需要权限申请
-    public String buildToolsVersion = Default.DEFAULT_BUILD_TOOLS_VERSION;
-    public String supportLibraryVersion = Default.DEFAULT_SUPPORT_LIB_VERSION;
-    public String javaCompileVersion = Default.DEFAULT_JAVA_COMPILE_VERSION;
-    public String sdkDir;
-    public String buildOutputName = Default.DEFAULT_BUILD_OUTPUT_NAME;
-    public String buildOutputPrefix = Default.DEFAULT_BUILD_OUTPUT_PREFIX;
-    public String buildOutputPath;
-    public String buildOutputBaseApkFilePath;
-    public String aapt;
-    public String dex;
-    public String androidJar;
-    public String apacheJar;
+    public int targetSdkVersion = Default.DEFAULT_TARGET_SDK_VERSION//23(Android 6.0) 以下 不需要权限申请
+    public String buildToolsVersion = Default.DEFAULT_BUILD_TOOLS_VERSION
+    public String supportLibraryVersion = Default.DEFAULT_SUPPORT_LIB_VERSION
+    public String javaCompileVersion = Default.DEFAULT_JAVA_COMPILE_VERSION
+    public String sdkDir
+    public String buildOutputName = Default.DEFAULT_BUILD_OUTPUT_NAME
+    public String buildOutputPrefix = Default.DEFAULT_BUILD_OUTPUT_PREFIX
+    public String buildOutputPath
+    public String buildOutputBaseApkFilePath
+    public String releaseApkFileName
+    public String releaseApkFilePath
+    public String aapt
+    public String dex
+    public String androidJar
+    public String apacheJar
+    public ConfigurableFileCollection classpath
 
     public void initOptions(Project project) {
 
@@ -54,7 +58,7 @@ public class ParallelSharedOptions {
         buildOutputName = Helper.isInvalid(buildOutputName) ? Default.DEFAULT_BUILD_OUTPUT_NAME : buildOutputName
         buildOutputPrefix = Helper.isInvalid(buildOutputPrefix) ? Default.DEFAULT_BUILD_OUTPUT_PREFIX : buildOutputPrefix
         buildOutputPath = Helper.isInvalid(buildOutputPath) ? "$project.rootDir/$buildOutputName" : buildOutputPath
-        buildOutputBaseApkFilePath = Helper.isInvalid(buildOutputBaseApkFilePath) ? "$buildOutputPath/" + Default.DEFAULT_BASE_APK_SUFFIX : buildOutputBaseApkFilePath
+        buildOutputBaseApkFilePath = Helper.isInvalid(buildOutputBaseApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_BASE_APK_SUFFIX : buildOutputBaseApkFilePath
         sdkDir = Helper.isInvalid(sdkDir) ? getSDKDirFromProject(project) : sdkDir
 
         //config sdk start
