@@ -4,7 +4,7 @@ apply plugin: 'parallel.library'
 libraryOptions{
     packageName = "com.gordon.rawe.bundlebanana"
     parentModuleName = ":fruitbundles:bundleapple"
-    moduleProguardRulesFilePath = "$buildDir.parent/proguard-rules.pro"
+    moduleProguardRulesFilePath = "$rootDir/sub-project-proguard-rules.pro"
 }
 
 android {

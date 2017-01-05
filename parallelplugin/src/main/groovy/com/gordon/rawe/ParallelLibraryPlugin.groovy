@@ -41,7 +41,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
                 println("$project.path fail to pass check because LibraryPlugin are disabled...")
                 conditionCheck = false
             }
-            if (libraryExtension == null) {
+            if (libraryOptions == null) {
                 println("$project.path fail to pass check because acquire LibraryOptions failed...")
                 conditionCheck = false
             }
