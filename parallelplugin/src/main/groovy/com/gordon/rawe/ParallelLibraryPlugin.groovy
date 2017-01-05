@@ -9,6 +9,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.JavaCompile
 import proguard.gradle.ProGuardTask
 
@@ -29,14 +30,39 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
 
         libraryOptions = project.extensions.create(ParallelLibraryOptions.optionsName, ParallelLibraryOptions.class);
         project.afterEvaluate {
-            libraryOptions.initOptionsAfterEvaluate(project)
-            configureParentModule(project)
-            configureInitTask(project)
-            configureLibs(project)
-            configureAaptRelease(project)
-            configureCompileReleaseTask(project)
-            configureCopySOOutputsTask(project)
-            configureObfuscateReleaseTask(project)
+            println("$project.path start to configure...")
+
+            boolean conditionCheck = true;
+            if (ParallelSharedOptions.reference == null) {
+                println("$project.path fail to pass check because SharedOptions are empty...")
+                conditionCheck = false
+            }
+            if (!ParallelSharedOptions.reference.enabled) {
+                println("$project.path fail to pass check because LibraryPlugin are disabled...")
+                conditionCheck = false
+            }
+            if (libraryExtension == null) {
+                println("$project.path fail to pass check because acquire LibraryOptions failed...")
+                conditionCheck = false
+            }
+            if (Helper.isInvalid(libraryOptions.packageName)) {
+                println("$project.path fail to pass check because acquire package name failed...")
+                isConditionOK = false
+            }
+            if (conditionCheck) {
+                libraryOptions.initOptionsAfterEvaluate(project)
+                configureParentModule(project)
+                ensureDirs(project)
+                configureLibs(project)
+                configureAaptRelease(project)
+                configureCompileReleaseTask(project)
+                configureCopySOOutputsTask(project)
+                configureObfuscateReleaseTask(project)
+                configureDexReleaseTask(project)
+                configureBundleReleaseTask(project)
+            }
+
+            println("$project.path configuration finished...")
         }
     }
 
@@ -74,8 +100,8 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         }
     }
 
-    private void configureInitTask(Project project) {
-        project.logger.info("$project.path configParallelDirs start...")
+    private void ensureDirs(Project project) {
+        project.logger.info("$project.path ensureDirs start...")
         Task configDirs = project.tasks.create(TaskNames.CONFIG_DIRS, Task.class);
 
         configDirs.outputs.dir "$project.buildDir/gen/r"
@@ -119,7 +145,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         configDirs.getDependsOn().each {
             println "$project.path configParallelDirs findDependency: " + it.toString()
         }
-        project.logger.info("$project.path configureInitTask end...")
+        project.logger.info("$project.path ensureDirs end...")
     }
 
     public void configureAaptRelease(Project project) {
@@ -301,5 +327,45 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         proGuard.libraryjars(getClasspath(project))
         proGuard.dependsOn TaskNames.COPY_SO_OUTPUT
         project.logger.info("$project.path configure $TaskNames.OBFUSCATE end...")
+    }
+
+    private static void configureDexReleaseTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.DEX_COMPILE start...")
+        Exec exec = project.tasks.create(TaskNames.DEX_COMPILE, Exec.class)
+
+        exec.inputs.file "$project.buildDir/intermediates/classes-obfuscated/classes-obfuscated.jar"
+        exec.outputs.file "$project.buildDir/intermediates/dex/${project.name}_dex.zip"
+
+        exec.workingDir project.buildDir
+        exec.executable ParallelSharedOptions.reference.dex
+
+        def argv = []
+        argv << '--dex'
+        argv << '--debug'
+        argv << "--output=$project.buildDir/intermediates/dex/${project.name}_dex.zip"
+        argv << "$project.buildDir/intermediates/classes-obfuscated/classes-obfuscated.jar"
+        exec.args = argv
+        exec.dependsOn TaskNames.OBFUSCATE
+        project.logger.info("$project.path configure $TaskNames.DEX_COMPILE end...")
+    }
+
+    private void configureBundleReleaseTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.BUNDLE_COMPILE start...")
+        Zip zip = project.tasks.create(TaskNames.BUNDLE_COMPILE, Zip.class)
+
+        zip.inputs.file "$project.buildDir/intermediates/dex/${project.name}_dex.zip"
+        zip.inputs.file "$project.buildDir/intermediates/res/resources.zip"
+        zip.outputs.file "$ParallelSharedOptions.reference.buildOutputPath/${libraryOptions.soName}.so"
+
+        zip.archiveName = "${libraryOptions.soName}.so"
+        zip.destinationDir = project.file(ParallelSharedOptions.reference.buildOutputPath)
+        zip.duplicatesStrategy = "fail"
+        zip.from project.zipTree("$project.buildDir/intermediates/dex/${project.name}_dex.zip")
+        zip.from project.zipTree("$project.buildDir/intermediates/res/resources.zip")
+        zip.doLast {
+            assert new File("$ParallelSharedOptions.reference.buildOutputPath/${libraryOptions.soName}.so").exists()
+        }
+        zip.dependsOn TaskNames.DEX_COMPILE
+        project.logger.info("$project.path configure $TaskNames.BUNDLE_COMPILE end")
     }
 }

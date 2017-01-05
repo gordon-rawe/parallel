@@ -9,7 +9,6 @@ public class TaskNames {
     public static final String DEX_COMPILE = "dexParallelCompile";
     public static final String BUNDLE_COMPILE = "bundleParallelCompile";
     public static final String CONFIG_DIRS = "configParallelDirs";
-    public static final String CONFIG_LIBS = "configParallelLibs";
     public static final String CONFIG_PARENT = "configParallelParent";
     public static final String COPY_AAPT = "copyParallelAapt";
 
