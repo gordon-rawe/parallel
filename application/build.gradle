@@ -42,7 +42,9 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile project(":sharedlibs")
     if (!parallelEnabled) {
-        compile project(":fruitbundles:bundlebanana")
-        compile project(":fruitbundles:bundleapple")
+        compile project(":hierachy:father")
+        compile project(":hierachy:son")
+        compile project(":hierachy:daughter")
+        compile project(":hierachy:flat")
     }
 }

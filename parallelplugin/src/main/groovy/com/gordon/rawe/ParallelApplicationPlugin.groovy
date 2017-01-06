@@ -6,6 +6,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.bundling.Zip
@@ -28,6 +29,9 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
             configureReloadTask(project)
             configureRepackTask(project)
             configureResignTask(project)
+            configureRealignTask(project)
+            configureConcatMappingsTask(project)
+            letsGo(project)
         }
     }
 
@@ -125,7 +129,7 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
         project.logger.info("$project.path configure $TaskNames.RELOAD end...")
     }
 
-    def repackApk(String originApk, String targetApk, Project project) {
+    private static repackApk(String originApk, String targetApk, Project project) {
         project.logger.info("$project.path 重新打包apk: 增加压缩,压缩resources.arsc)")
         def noCompressExt = [".jpg", ".jpeg", ".png", ".gif",
                              ".wav", ".mp2", ".mp3", ".ogg", ".aac",
@@ -189,7 +193,7 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
         if (jarSigner == null && $ { System.env.'JAVA_HOME' } != null) {
             jarSigner = $ { System.env.'JAVA_HOME' }
         }
-
+        assert jarSigner != null: "没有找到jarsigner，可以手动在JAVA_HOME中配置或在插件中指定！"
         resignTask.doFirst {
             workingDir ParallelSharedOptions.reference.buildOutputPath
             executable jarSigner
@@ -214,5 +218,65 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
         }
         resignTask.dependsOn TaskNames.REPACK
         project.logger.info("$project.path configure $TaskNames.RESIGN end...")
+    }
+
+    private static void configureRealignTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.REALIGN start...")
+        Exec realignTask = project.tasks.create(TaskNames.REALIGN, Exec.class)
+        realignTask.inputs.file ParallelSharedOptions.reference.buildOutputReloadedApkFilePath
+        realignTask.outputs.file ParallelSharedOptions.reference.buildOutputRepackedApkFilePath
+
+        File oldApkFile = project.file(ParallelSharedOptions.reference.buildOutputResignedApkFilePath)
+        assert oldApkFile != null: "没有找到release包！"
+        File newApkFile = new File(ParallelSharedOptions.reference.buildOutputFinalApkFilePath)
+
+        realignTask.doFirst {
+            commandLine ParallelSharedOptions.reference.zipAlign
+            def argv = []
+            argv << '-f'    //overwrite existing outfile.zip
+            // argv << '-z'    //recompress using Zopfli
+            argv << '-v'    //verbose output
+            argv << '4'     //alignment in bytes, e.g. '4' provides 32-bit alignment
+            argv << oldApkFile.absolutePath
+            argv << newApkFile.absolutePath
+            args = argv
+        }
+        realignTask << {
+            assert newApkFile.exists(): "没有找到重新zipalign的release包！"
+        }
+        realignTask.dependsOn TaskNames.RESIGN
+        project.logger.info("$project.path configure $TaskNames.REALIGN end...")
+    }
+
+    private static void configureConcatMappingsTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.CONCAT_MAPPINGS start...")
+
+        Task concatMapTask = project.tasks.create(TaskNames.CONCAT_MAPPINGS, Task.class);
+        concatMapTask.inputs.files project.fileTree(new File(ParallelSharedOptions.reference.buildOutputPath)).include('*mapping.txt')
+        concatMapTask.outputs.file "$ParallelSharedOptions.reference.buildOutputPath/$ParallelSharedOptions.reference.buildOutputPrefix-mapping-final.txt"
+
+        concatMapTask << {
+            FileCollection sources = project.fileTree(new File(ParallelSharedOptions.reference.buildOutputPath)).include('*mapping.txt')
+            File target = new File("$ParallelSharedOptions.reference.buildOutputPath/$ParallelSharedOptions.reference.buildOutputPrefix-mapping-final.txt")
+            File tmp = File.createTempFile('concat', null, target.getParentFile())
+            tmp.withWriter { writer ->
+                sources.each { file ->
+                    file.withReader { reader ->
+                        writer << reader
+                    }
+                }
+            }
+            target.delete()
+            tmp.renameTo(target)
+        }
+        concatMapTask.dependsOn TaskNames.REALIGN
+        project.logger.info("$project.path configure $TaskNames.CONCAT_MAPPINGS end...")
+    }
+
+    private void letsGo(Project project) {
+        project.logger.info("$project.path configure $TaskNames.GO start...")
+        Task letsGo = project.tasks.create(TaskNames.GO, Task.class)
+        letsGo.dependsOn TaskNames.CONCAT_MAPPINGS
+        project.logger.info("$project.path configure $TaskNames.GO end...")
     }
 }

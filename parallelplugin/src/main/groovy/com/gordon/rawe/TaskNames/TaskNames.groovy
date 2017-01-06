@@ -17,4 +17,7 @@ public class TaskNames {
     public static final String RELOAD = "parallelReload";
     public static final String REPACK = "parallelRepack";
     public static final String RESIGN = "parallelResign";
+    public static final String REALIGN = "parallelRealign";
+    public static final String CONCAT_MAPPINGS = "parallelConcatMappings";
+    public static final String GO = "letsGo";
 }

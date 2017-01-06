@@ -1,5 +1,5 @@
 if (true) {
-    include ':application', ':sharedlibs', ':fruitbundles:bundleapple', ':fruitbundles:bundlebanana', ':parallelplugin'
+    include ':application', ':sharedlibs', ':hierachy:father', ':hierachy:daughter', ':hierachy:son', ':flat'
 } else {
     include ':parallelplugin'
 }

@@ -29,6 +29,7 @@ public class ParallelSharedOptions {
         public static final String DEFAULT_REPACKED_APK_SUFFIX = "-repacked-release.apk"
         public static final String DEFAULT_RELOADED_APK_SUFFIX = "-reloaded-release.apk"
         public static final String DEFAULT_RESIGNED_APK_SUFFIX = "-resigned-release.apk"
+        public static final String DEFAULT_FINAL_APK_SUFFIX = "-final-release.apk"
         public static final String DEFAULT_SO_LOCATION = "assets/baseres/"
     }
 
@@ -51,6 +52,7 @@ public class ParallelSharedOptions {
     public String buildOutputRepackedApkFilePath
     public String buildOutputReloadedApkFilePath
     public String buildOutputResignedApkFilePath
+    public String buildOutputFinalApkFilePath
     public String soLocation
     public String releaseApkFileName
     public String releaseApkFilePath
@@ -72,6 +74,8 @@ public class ParallelSharedOptions {
         buildOutputRepackedApkFilePath = Helper.isInvalid(buildOutputRepackedApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_REPACKED_APK_SUFFIX : buildOutputRepackedApkFilePath
         buildOutputReloadedApkFilePath = Helper.isInvalid(buildOutputReloadedApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_RELOADED_APK_SUFFIX : buildOutputReloadedApkFilePath
         buildOutputResignedApkFilePath = Helper.isInvalid(buildOutputResignedApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_RESIGNED_APK_SUFFIX : buildOutputResignedApkFilePath
+        buildOutputFinalApkFilePath = Helper.isInvalid(buildOutputFinalApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_FINAL_APK_SUFFIX : buildOutputFinalApkFilePath
+
         sdkDir = Helper.isInvalid(sdkDir) ? getSDKDirFromProject(project) : sdkDir
         soLocation = Helper.isInvalid(soLocation) ? Default.DEFAULT_SO_LOCATION : soLocation
         //config sdk start

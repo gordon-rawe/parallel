@@ -3,12 +3,13 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/application/application.iml" filepath="$PROJECT_DIR$/application/application.iml" />
-      <module fileurl="file://$PROJECT_DIR$/fruitbundles/bundleapple/bundleapple.iml" filepath="$PROJECT_DIR$/fruitbundles/bundleapple/bundleapple.iml" />
-      <module fileurl="file://$PROJECT_DIR$/fruitbundles/bundlebanana/bundlebanana.iml" filepath="$PROJECT_DIR$/fruitbundles/bundlebanana/bundlebanana.iml" />
-      <module fileurl="file://$PROJECT_DIR$/fruitbundles/fruitbundles.iml" filepath="$PROJECT_DIR$/fruitbundles/fruitbundles.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hierachy/daughter/daughter.iml" filepath="$PROJECT_DIR$/hierachy/daughter/daughter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hierachy/father/father.iml" filepath="$PROJECT_DIR$/hierachy/father/father.iml" />
+      <module fileurl="file://$PROJECT_DIR$/flat/flat.iml" filepath="$PROJECT_DIR$/flat/flat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hierachy/hierachy.iml" filepath="$PROJECT_DIR$/hierachy/hierachy.iml" />
       <module fileurl="file://$PROJECT_DIR$/parallel.iml" filepath="$PROJECT_DIR$/parallel.iml" />
-      <module fileurl="file://$PROJECT_DIR$/parallelplugin/parallelplugin.iml" filepath="$PROJECT_DIR$/parallelplugin/parallelplugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedlibs/sharedlibs.iml" filepath="$PROJECT_DIR$/sharedlibs/sharedlibs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hierachy/son/son.iml" filepath="$PROJECT_DIR$/hierachy/son/son.iml" />
     </modules>
   </component>
 </project>
