@@ -26,6 +26,10 @@ public class ParallelSharedOptions {
         public static final String DEFAULT_BUILD_OUTPUT_NAME = "build-output"
         public static final String DEFAULT_BUILD_OUTPUT_PREFIX = "parallel"
         public static final String DEFAULT_BASE_APK_SUFFIX = "-base-release.apk"
+        public static final String DEFAULT_REPACKED_APK_SUFFIX = "-repacked-release.apk"
+        public static final String DEFAULT_RELOADED_APK_SUFFIX = "-reloaded-release.apk"
+        public static final String DEFAULT_RESIGNED_APK_SUFFIX = "-resigned-release.apk"
+        public static final String DEFAULT_SO_LOCATION = "assets/baseres/"
     }
 
     /** mandatory */
@@ -44,10 +48,16 @@ public class ParallelSharedOptions {
     public String buildOutputPrefix = Default.DEFAULT_BUILD_OUTPUT_PREFIX
     public String buildOutputPath
     public String buildOutputBaseApkFilePath
+    public String buildOutputRepackedApkFilePath
+    public String buildOutputReloadedApkFilePath
+    public String buildOutputResignedApkFilePath
+    public String soLocation
     public String releaseApkFileName
     public String releaseApkFilePath
     public String aapt
     public String dex
+    public String zipAlign
+    public String jarSigner
     public String androidJar
     public String apacheJar
     public ConfigurableFileCollection classpath
@@ -59,8 +69,11 @@ public class ParallelSharedOptions {
         buildOutputPrefix = Helper.isInvalid(buildOutputPrefix) ? Default.DEFAULT_BUILD_OUTPUT_PREFIX : buildOutputPrefix
         buildOutputPath = Helper.isInvalid(buildOutputPath) ? "$project.rootDir/$buildOutputName" : buildOutputPath
         buildOutputBaseApkFilePath = Helper.isInvalid(buildOutputBaseApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_BASE_APK_SUFFIX : buildOutputBaseApkFilePath
+        buildOutputRepackedApkFilePath = Helper.isInvalid(buildOutputRepackedApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_REPACKED_APK_SUFFIX : buildOutputRepackedApkFilePath
+        buildOutputReloadedApkFilePath = Helper.isInvalid(buildOutputReloadedApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_RELOADED_APK_SUFFIX : buildOutputReloadedApkFilePath
+        buildOutputResignedApkFilePath = Helper.isInvalid(buildOutputResignedApkFilePath) ? "$buildOutputPath/$buildOutputPrefix" + Default.DEFAULT_RESIGNED_APK_SUFFIX : buildOutputResignedApkFilePath
         sdkDir = Helper.isInvalid(sdkDir) ? getSDKDirFromProject(project) : sdkDir
-
+        soLocation = Helper.isInvalid(soLocation) ? Default.DEFAULT_SO_LOCATION : soLocation
         //config sdk start
         //String aaptDir = ParallelSharedOptions.class.getResource("/aapt").path
         String outJarFolder = getJarFolder()
@@ -97,8 +110,11 @@ public class ParallelSharedOptions {
             }
         }
         File dexFile = project.file(dex)
+        zipAlign = Os.isFamily(Os.FAMILY_WINDOWS) ? "$sdkDir/build-tools/$buildToolsVersion/zipalign.exe" : "$sdkDir/build-tools/$buildToolsVersion/zipalign"
+        File zipAlignFile = project.file(zipAlign)
         dexFile.setExecutable(true)
         aaptFile.setExecutable(true)
+        zipAlignFile.setExecutable(true)
         println reference
         //config sdk end
     }

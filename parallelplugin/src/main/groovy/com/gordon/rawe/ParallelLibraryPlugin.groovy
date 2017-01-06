@@ -30,23 +30,23 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
 
         libraryOptions = project.extensions.create(ParallelLibraryOptions.optionsName, ParallelLibraryOptions.class);
         project.afterEvaluate {
-            println("$project.path start to configure...")
+            project.logger.info("$project.path start to configure...")
 
             boolean conditionCheck = true;
             if (ParallelSharedOptions.reference == null) {
-                println("$project.path fail to pass check because SharedOptions are empty...")
+                project.logger.error("$project.path fail to pass check because SharedOptions are empty...")
                 conditionCheck = false
             }
             if (!ParallelSharedOptions.reference.enabled) {
-                println("$project.path fail to pass check because LibraryPlugin are disabled...")
+                project.logger.error("$project.path fail to pass check because LibraryPlugin are disabled...")
                 conditionCheck = false
             }
             if (libraryOptions == null) {
-                println("$project.path fail to pass check because acquire LibraryOptions failed...")
+                project.logger.error("$project.path fail to pass check because acquire LibraryOptions failed...")
                 conditionCheck = false
             }
             if (Helper.isInvalid(libraryOptions.packageName)) {
-                println("$project.path fail to pass check because acquire package name failed...")
+                project.logger.error("$project.path fail to pass check because acquire package name failed...")
                 isConditionOK = false
             }
             if (conditionCheck) {
@@ -62,7 +62,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
                 configureBundleReleaseTask(project)
             }
 
-            println("$project.path configuration finished...")
+            project.logger.info("$project.path configuration finished...")
         }
     }
 
@@ -79,7 +79,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
 
     private void configureParentModule(Project project) {
         if (Helper.isInvalid(libraryOptions.parentModuleName)) return
-        println "$project.path configureParentModule parentModuleName is $libraryOptions.parentModuleName"
+        project.logger.info("$project.path configureParentModule parentModuleName is $libraryOptions.parentModuleName")
         parentProject = project.project(libraryOptions.parentModuleName)
         project.evaluationDependsOn(parentProject.path)
         if (parentProject != null) {
@@ -92,11 +92,11 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
             parentModuleJar = "$parentProject.buildDir/intermediates/classes-obfuscated/classes-obfuscated.jar"
         }
         project.tasks.create(TaskNames.CONFIG_PARENT, Task.class) << {
-            println "$project.path configureParentModule parentModuleProjectName==" + (parentProject == null ? "null" : parentProject.name)
-            println "$project.path configureParentModule parentModuleProjectPath==" + (parentProject == null ? "null" : parentProject.path)
-            println "$project.path configureParentModule parentPackageName==$parentPackageName"
-            println "$project.path configureParentModule parentModuleJar==$parentModuleJar"
-            println "$project.path configureParentModule parentRFile==$parentRFile"
+            project.logger.info("$project.path configureParentModule parentModuleProjectName==" + parentProject == null ? "null" : parentProject.name)
+            project.logger.info("$project.path configureParentModule parentModuleProjectPath==" + parentProject == null ? "null" : parentProject.path)
+            project.logger.info("$project.path configureParentModule parentPackageName==$parentPackageName")
+            project.logger.info("$project.path configureParentModule parentModuleJar==$parentModuleJar")
+            project.logger.info("$project.path configureParentModule parentRFile==$parentRFile")
         }
     }
 
@@ -143,7 +143,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
             configDirs.dependsOn(dependTasks)
 
         configDirs.getDependsOn().each {
-            println "$project.path configParallelDirs findDependency: " + it.toString()
+            project.logger.info("$project.path configParallelDirs findDependency: " + it.toString())
         }
         project.logger.info("$project.path ensureDirs end...")
     }
@@ -165,8 +165,8 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         if (parentProject != null) {
             inputRFile = parentRFile
             packageName = "${parentPackageName}-$packageName"
-            println "$project.path $TaskNames.AAPT inputRFile is $inputRFile"
-            println "$project.path $TaskNames.AAPT packageName is $packageName"
+            project.logger.info("$project.path $TaskNames.AAPT inputRFile is $inputRFile")
+            project.logger.info("$project.path $TaskNames.AAPT packageName is $packageName")
         }
 
         aaptTask.inputs.file inputRFile
@@ -185,7 +185,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
             parseApkXml.Module.each { module ->
                 if (module.@packageName == libraryOptions.packageName) {
                     resourceId = module.@resourceId
-                    println "$project.path parallelAaptRelease apk_module_config:[packageName:" + module.@packageName + "],[resourceId:$resourceId]"
+                    project.logger.info("$project.path parallelAaptRelease apk_module_config:[packageName:" + module.@packageName + "],[resourceId:$resourceId]")
                 }
             }
             def argv = []
@@ -233,8 +233,6 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
     }
 
     private ConfigurableFileCollection getClasspath(Project project) {
-        println "libjars " + libJars == null
-        println "libjars" + ParallelSharedOptions.reference.classpath == null
         assert ParallelSharedOptions.reference.classpath != null && !ParallelSharedOptions.reference.classpath.isEmpty(), "base-classpath is null or empty!"
         ConfigurableFileCollection fileCollection = project.files(ParallelSharedOptions.reference.classpath)
 

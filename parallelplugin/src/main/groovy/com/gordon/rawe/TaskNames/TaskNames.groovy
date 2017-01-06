@@ -14,4 +14,7 @@ public class TaskNames {
 
     /*application task names*/
     public static final String ASSEMBLE_RELEASE = "parallelAssembleRelease";
+    public static final String RELOAD = "parallelReload";
+    public static final String REPACK = "parallelRepack";
+    public static final String RESIGN = "parallelResign";
 }

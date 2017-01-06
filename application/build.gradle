@@ -3,6 +3,10 @@ apply plugin: 'parallel.application'
 
 applicationOptions {
     packageName = "com.gordon.rawe.parallel"
+    keystore = "$rootDir/release.keystore"
+    keyAlias = "gordon"
+    keyPassword = "gordon"
+    storePassword = "gordon"
 }
 
 android {

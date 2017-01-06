@@ -7,17 +7,27 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.bundling.Zip
+
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 public class ParallelApplicationPlugin implements Plugin<Project> {
+    ParallelApplicationOptions applicationOptions
 
     @Override
     void apply(Project project) {
-        ParallelApplicationOptions applicationOptions = project.extensions.create(ParallelApplicationOptions.optionsName, ParallelApplicationOptions.class)
+        applicationOptions = project.extensions.create(ParallelApplicationOptions.optionsName, ParallelApplicationOptions.class)
         project.afterEvaluate {
             applicationOptions.initOptions(project)
             configureClasspath(project)
             configureCleanTask(project)
             configureAssembleReleaseTask(project)
+            configureReloadTask(project)
+            configureRepackTask(project)
+            configureResignTask(project)
         }
     }
 
@@ -45,7 +55,7 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
     private static void configureCleanTask(Project project) {
         Task clean = project.tasks.getByName("clean")
         if (clean == null) {
-            println("$project.path configureCleanTask tasks not contains clean, return!")
+            project.logger.info("$project.path configureCleanTask tasks not contains clean, return!")
             return
         }
         clean.doLast {
@@ -54,6 +64,7 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
         }
     }
 
+    /** 这里的manifest拷贝出来不知道有没有用，待后续验证 */
     private static void configureAssembleReleaseTask(Project project) {
         project.logger.info("$project.path apply configureDynamicAssembleRelease start...")
         Copy copy = project.tasks.create(TaskNames.ASSEMBLE_RELEASE, Copy.class);
@@ -68,7 +79,7 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
 
         copy.setDescription("Copy $project.buildDir to $ParallelSharedOptions.reference.buildOutputPath")
         copy.from(ParallelSharedOptions.reference.releaseApkFilePath) {
-            rename ParallelSharedOptions.reference.releaseApkFileName, "$ParallelSharedOptions.reference.buildOutputPrefix-base-release.apk"
+            rename ParallelSharedOptions.reference.releaseApkFileName, "$ParallelSharedOptions.reference.buildOutputPrefix$ParallelSharedOptions.Default.DEFAULT_BASE_APK_SUFFIX"
         }
         copy.from("$project.buildDir/outputs/mapping/release/mapping.txt") {
             rename 'mapping.txt', "$ParallelSharedOptions.reference.buildOutputPrefix-base-mapping.txt"
@@ -79,5 +90,129 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
         copy.into(ParallelSharedOptions.reference.buildOutputPath)
         copy.dependsOn "assembleRelease"
         project.logger.info("$project.path apply $TaskNames.ASSEMBLE_RELEASE end")
+    }
+
+    private static void configureReloadTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.RELOAD start...")
+        Zip zip = project.tasks.create(TaskNames.RELOAD, Zip.class);
+
+        zip.inputs.file ParallelSharedOptions.reference.buildOutputBaseApkFilePath
+        zip.inputs.files project.fileTree(new File(ParallelSharedOptions.reference.buildOutputPath)).include('*.so')
+        //增加so文件输入
+        zip.inputs.file project.fileTree(new File(ParallelSharedOptions.reference.buildOutputPath, 'jni'))
+        zip.outputs.file ParallelSharedOptions.reference.buildOutputReloadedApkFilePath
+        zip.setDescription("$TaskNames.RELOAD task")
+
+        zip.into(ParallelSharedOptions.reference.soLocation) {
+            from project.fileTree(new File(ParallelSharedOptions.reference.buildOutputPath)).include('*.so')
+        }
+        zip.into('lib') {
+            from project.fileTree(new File(ParallelSharedOptions.reference.buildOutputPath, 'jni'))
+        }
+        zip.from(project.zipTree(ParallelSharedOptions.reference.buildOutputBaseApkFilePath)) {
+            exclude('**/META-INF/*.SF')
+            exclude('**/META-INF/*.RSA')
+        }
+
+        zip.destinationDir project.file(ParallelSharedOptions.reference.buildOutputPath)
+        zip.archiveName "$ParallelSharedOptions.reference.buildOutputPrefix$ParallelSharedOptions.Default.DEFAULT_RELOADED_APK_SUFFIX"
+
+        Set<Task> dependTasks = project.rootProject.getTasksByName(TaskNames.BUNDLE_COMPILE, true)
+        zip.setDependsOn(dependTasks)
+        dependTasks.each {
+            project.logger.info("$project.path find dependency: " + it.toString())
+        }
+        project.logger.info("$project.path configure $TaskNames.RELOAD end...")
+    }
+
+    def repackApk(String originApk, String targetApk, Project project) {
+        project.logger.info("$project.path 重新打包apk: 增加压缩,压缩resources.arsc)")
+        def noCompressExt = [".jpg", ".jpeg", ".png", ".gif",
+                             ".wav", ".mp2", ".mp3", ".ogg", ".aac",
+                             ".mpg", ".mpeg", ".mid", ".midi", ".smf", ".jet",
+                             ".rtttl", ".imy", ".xmf", ".mp4", ".m4a",
+                             ".m4v", ".3gp", ".3gpp", ".3g2", ".3gpp2",
+                             ".amr", ".awb", ".wma", ".wmv"]
+        ZipFile zipFile = new ZipFile(originApk)
+        ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(targetApk)))
+        zipFile.entries().each { entryIn ->
+            if (entryIn.directory) {
+                project.logger.info("$project.path:apply dynamicApplication:${entryIn.name} is a directory")
+            } else {
+                def entryOut = new ZipEntry(entryIn.name)
+                def dotPos = entryIn.name.lastIndexOf('.')
+                def ext = (dotPos >= 0) ? entryIn.name.substring(dotPos) : ""
+                def isRes = entryIn.name.startsWith('res/')
+                if (isRes && ext in noCompressExt) {
+                    entryOut.method = ZipEntry.STORED
+                    entryOut.size = entryIn.size
+                    entryOut.compressedSize = entryIn.size
+                    entryOut.crc = entryIn.crc
+                } else {
+                    entryOut.method = ZipEntry.DEFLATED
+                }
+                zos.putNextEntry(entryOut)
+                zos << zipFile.getInputStream(entryIn)
+                zos.closeEntry()
+            }
+        }
+        zos.finish()
+        zos.close()
+        zipFile.close()
+        project.logger.info("$project.path 压缩结束")
+    }
+
+    private void configureRepackTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.REPACK start...")
+        Task repackTask = project.tasks.create(TaskNames.REPACK, Task.class);
+        repackTask.inputs.file ParallelSharedOptions.reference.buildOutputReloadedApkFilePath
+        repackTask.outputs.file ParallelSharedOptions.reference.buildOutputRepackedApkFilePath
+
+        repackTask.doLast {
+            File oldApkFile = project.file(ParallelSharedOptions.reference.buildOutputReloadedApkFilePath)
+            assert oldApkFile != null: "没有找到release包！"
+            File newApkFile = new File(ParallelSharedOptions.reference.buildOutputRepackedApkFilePath)
+            repackApk(oldApkFile.absolutePath, newApkFile.absolutePath, project) //重新打包
+            assert newApkFile.exists(): "没有找到重新压缩的release包！"
+        }
+        repackTask.dependsOn TaskNames.RELOAD
+        project.logger.info("$project.path configure $TaskNames.REPACK end...")
+    }
+
+    private void configureResignTask(Project project) {
+        project.logger.info("$project.path configure $TaskNames.RESIGN start...")
+        Exec resignTask = project.tasks.create(TaskNames.RESIGN, Exec.class)
+        resignTask.inputs.file ParallelSharedOptions.reference.buildOutputRepackedApkFilePath
+        resignTask.outputs.file ParallelSharedOptions.reference.buildOutputResignedApkFilePath
+
+        def jarSigner = ParallelSharedOptions.reference.jarSigner
+        if (jarSigner == null && $ { System.env.'JAVA_HOME' } != null) {
+            jarSigner = $ { System.env.'JAVA_HOME' }
+        }
+
+        resignTask.doFirst {
+            workingDir ParallelSharedOptions.reference.buildOutputPath
+            executable jarSigner
+
+            def argv = []
+            argv << '-verbose'
+            argv << '-sigalg'
+            argv << 'SHA1withRSA'
+            argv << '-digestalg'
+            argv << 'SHA1'
+            argv << '-keystore'
+            argv << applicationOptions.keystore
+            argv << '-storepass'
+            argv << applicationOptions.storePassword
+            argv << '-keypass'
+            argv << applicationOptions.keyPassword
+            argv << '-signedjar'
+            argv << "$ParallelSharedOptions.reference.buildOutputPrefix$ParallelSharedOptions.Default.DEFAULT_RESIGNED_APK_SUFFIX"
+            argv << "$ParallelSharedOptions.reference.buildOutputPrefix$ParallelSharedOptions.Default.DEFAULT_REPACKED_APK_SUFFIX"
+            argv << applicationOptions.keyAlias
+            args = argv
+        }
+        resignTask.dependsOn TaskNames.REPACK
+        project.logger.info("$project.path configure $TaskNames.RESIGN end...")
     }
 }

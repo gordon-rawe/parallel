@@ -27,7 +27,7 @@ public class ParallelLibraryOptions {
         assetsDirPath = Helper.isInvalid(assetsDirPath) ? "$libraryProject.projectDir/src/main/assets" : assetsDirPath
         androidManifestFilePath = Helper.isInvalid(androidManifestFilePath) ? "$libraryProject.projectDir/src/main/AndroidManifest.xml" : androidManifestFilePath
         soName = packageName.replace('.', '_')
-        println this
+        libraryProject.logger.info(this.toString())
     }
 
     @Override
