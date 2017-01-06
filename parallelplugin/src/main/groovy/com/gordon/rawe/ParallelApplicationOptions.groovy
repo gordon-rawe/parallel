@@ -18,7 +18,7 @@ public class ParallelApplicationOptions {
 
     public void initOptions(Project project) {
         ParallelSharedOptions.reference.applicationPackageName = packageName
-        ParallelSharedOptions.reference.applicationBuildDir = "$project.buildDir/generated/source/r/release/" + packageName.replace('.', '/') + "/R.java"
+        ParallelSharedOptions.reference.applicationBuildDir = project.buildDir
         ParallelSharedOptions.reference.releaseApkFileName = Helper.isInvalid(ParallelSharedOptions.reference.releaseApkFileName) ? "$project.name-release.apk" : ParallelSharedOptions.reference.releaseApkFileName
         ParallelSharedOptions.reference.releaseApkFilePath = Helper.isInvalid(ParallelSharedOptions.reference.releaseApkFilePath) ? "$project.buildDir/outputs/apk/$ParallelSharedOptions.reference.releaseApkFileName" : ParallelSharedOptions.reference.releaseApkFilePath
     }

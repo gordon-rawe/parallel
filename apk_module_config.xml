@@ -6,6 +6,6 @@
     0x10到0x7e的都可以用
 -->
 <ApkModules>
-    <Module packageName="com.gordon.rawe.bundleapple" resourceId="0x7d" />
-    <Module packageName="com.gordon.rawe.bundleapple" resourceId="0x7e" />
+    <Module packageName="com.gordon.rawe.bundleapple" resourceId="0x5c" />
+    <Module packageName="com.gordon.rawe.bundlebanana" resourceId="0x6c" />
 </ApkModules>

@@ -157,11 +157,11 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         aaptTask.inputs.file libraryOptions.androidManifestFilePath
         aaptTask.inputs.dir libraryOptions.resourceDirPath
         aaptTask.inputs.dir libraryOptions.assetsDirPath
+        aaptTask.inputs.dir ParallelSharedOptions.reference.moduleConfigFilePath
 
         //no inspection Groovy Unused Assignment
         def packageName = ParallelSharedOptions.reference.applicationPackageName
         def inputRFile = "$ParallelSharedOptions.reference.applicationBuildDir/generated/source/r/release/" + packageName.replace('.', '/') + "/R.java"
-
         if (parentProject != null) {
             inputRFile = parentRFile
             packageName = "${parentPackageName}-$packageName"

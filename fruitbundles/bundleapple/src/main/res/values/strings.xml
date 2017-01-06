@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name_apple">BundleApple</string>
+    <string name="apple_app_name">BundleApple</string>
+    <string name="author">Gordon Rawe</string>
 </resources>
