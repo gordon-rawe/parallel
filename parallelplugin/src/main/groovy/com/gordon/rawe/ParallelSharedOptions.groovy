@@ -39,7 +39,7 @@ public class ParallelSharedOptions {
     public String applicationBuildDir
 
     /** optional */
-    public String enabled = true;
+    public boolean enabled = true;
     public int targetSdkVersion = Default.DEFAULT_TARGET_SDK_VERSION//23(Android 6.0) 以下 不需要权限申请
     public String buildToolsVersion = Default.DEFAULT_BUILD_TOOLS_VERSION
     public String supportLibraryVersion = Default.DEFAULT_SUPPORT_LIB_VERSION

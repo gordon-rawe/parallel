@@ -22,16 +22,34 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
     void apply(Project project) {
         applicationOptions = project.extensions.create(ParallelApplicationOptions.optionsName, ParallelApplicationOptions.class)
         project.afterEvaluate {
-            applicationOptions.initOptions(project)
-            configureClasspath(project)
-            configureCleanTask(project)
-            configureAssembleReleaseTask(project)
-            configureReloadTask(project)
-            configureRepackTask(project)
-            configureResignTask(project)
-            configureRealignTask(project)
-            configureConcatMappingsTask(project)
-            letsGo(project)
+            boolean checkCondition = true
+            if (applicationOptions == null) {
+                checkCondition = false;
+            }
+            if (ParallelSharedOptions.reference == null) {
+                checkCondition = false;
+            }
+            if (!ParallelSharedOptions.reference.enabled) {
+                checkCondition = false;
+            }
+            if (!project.android) { //只可以在 android application 或者 android lib 项目中使用
+                checkCondition = false;
+            }
+            if (Helper.isInvalid(applicationOptions.packageName)) {
+                checkCondition = false;
+            }
+            if (checkCondition) {
+                applicationOptions.initOptions(project)
+                configureClasspath(project)
+                configureCleanTask(project)
+                configureAssembleReleaseTask(project)
+                configureReloadTask(project)
+                configureRepackTask(project)
+                configureResignTask(project)
+                configureRealignTask(project)
+                configureConcatMappingsTask(project)
+                letsGo(project)
+            }
         }
     }
 

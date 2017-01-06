@@ -45,6 +45,6 @@ dependencies {
         compile project(":hierachy:father")
         compile project(":hierachy:son")
         compile project(":hierachy:daughter")
-        compile project(":hierachy:flat")
+        compile project(":flat")
     }
 }
