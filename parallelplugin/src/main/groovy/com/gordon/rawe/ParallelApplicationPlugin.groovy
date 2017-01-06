@@ -208,8 +208,8 @@ public class ParallelApplicationPlugin implements Plugin<Project> {
         resignTask.outputs.file ParallelSharedOptions.reference.buildOutputResignedApkFilePath
 
         def jarSigner = ParallelSharedOptions.reference.jarSigner
-        if (jarSigner == null && $ { System.env.'JAVA_HOME' } != null) {
-            jarSigner = $ { System.env.'JAVA_HOME' }
+        if (jarSigner == null && System.env.'JAVA_HOME' != null) {
+            jarSigner = System.env.'JAVA_HOME'+"/bin/jarsigner"
         }
         assert jarSigner != null: "没有找到jarsigner，可以手动在JAVA_HOME中配置或在插件中指定！"
         resignTask.doFirst {
