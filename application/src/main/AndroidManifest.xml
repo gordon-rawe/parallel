@@ -16,6 +16,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.gordon.rawe.father.FatherHomeActivity" />
+        <activity android:name="com.gordon.rawe.son.SonHomeActivity" />
+        <activity android:name="com.gordon.rawe.daughter.DaughterHomeActivity" />
+        <activity android:name="com.gordon.rawe.flat.FlatHomeActivity" />
+
     </application>
 
 </manifest>

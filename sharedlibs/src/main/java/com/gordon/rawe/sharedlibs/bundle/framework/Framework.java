@@ -57,9 +57,8 @@ public final class Framework {
         log.log("*------------------------------------*", Logger.LogLevel.DBUG);
 
         long currentTimeMillis = System.currentTimeMillis();
-        initialize();
         launch();
-        boolean bundleInitialized = BundlePreference.getInstance().getBoolean(Environments.BUNDLE_INSTALL_STATUS, false);
+        boolean bundleInitialized = true;//BundlePreference.getInstance().getBoolean(Environments.BUNDLE_INSTALL_STATUS, false);
         if (bundleInitialized) {
             File file = new File(STORAGE_LOCATION);
             if (file.exists()) {
@@ -100,15 +99,8 @@ public final class Framework {
         }
     }
 
-
-    private static void initialize() {
-        File filesDir = RuntimeArgs.androidApplication.getFilesDir();
-        BASEDIR = properties.getProperty("ctrip.android.bundle.basedir", filesDir.getAbsolutePath());
-
-    }
-
     private static void launch() {
-        STORAGE_LOCATION = properties.getProperty("ctrip.android.bundle.storage", properties.getProperty("ctrip.android.bundle.framework.dir", BASEDIR + File.separatorChar + "storage")) + File.separatorChar;
+        STORAGE_LOCATION = RuntimeArgs.androidApplication.getExternalCacheDir().getPath()+File.separator+"storage";
     }
 
     public static String getProperty(String str, String defaultValue) {

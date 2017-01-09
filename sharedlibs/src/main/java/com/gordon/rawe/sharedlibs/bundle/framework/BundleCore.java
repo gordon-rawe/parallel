@@ -73,12 +73,11 @@ public class BundleCore {
         try {
 
             log.log("run", Logger.LogLevel.ERROR);
+            Log.d("trace", "bundle size" + BundleCore.getInstance().getBundles().size());
             for (Bundle bundle : BundleCore.getInstance().getBundles()) {
-
                 BundleImpl bundleImpl = (BundleImpl) bundle;
                 try {
                     bundleImpl.optDexFile();
-                    log.log(bundleImpl.getArchive().getArchiveFile().getAbsolutePath(), Logger.LogLevel.ERROR);
                 } catch (Exception e) {
                     e.printStackTrace();
                     log.log("Error while dexopt >>>", Logger.LogLevel.ERROR, e);
@@ -150,7 +149,6 @@ public class BundleCore {
     public Resources getDelegateResources() {
         return RuntimeArgs.delegateResources;
     }
-
 
 
     public File getBundleFile(String location) {

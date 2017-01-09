@@ -38,7 +38,8 @@ public class BundleInitializer {
                 HotPatchManager.getInstance().purge();
             }
             BundleCore.getInstance().startup();
-            if (isDexInstalled) {
+            Log.d("trace", "isDexInstalled ->" + isDexInstalled);
+            if (false) {
                 HotPatchManager.getInstance().run();
                 BundleCore.getInstance().run();
             } else {
@@ -48,6 +49,7 @@ public class BundleInitializer {
                         try {
                             ZipFile zipFile = new ZipFile(application.getApplicationInfo().sourceDir);
                             List<String> bundleFiles = getBundleEntryNames(zipFile, Environments.LIB_PATH, Environments.BUNDLE_SUFFIX);
+                            Log.d("trace", "isDexInstalled ->" + bundleFiles.size());
                             if (bundleFiles != null && bundleFiles.size() > 0) {
                                 processLibsBundles(zipFile, bundleFiles);
                                 BundlePreference.getInstance().putString(Environments.LAST_BUNDLE_KEY, bundleKey);
