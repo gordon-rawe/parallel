@@ -1,3 +1,4 @@
 <resources>
     <string name="father_app_name">BundleApple</string>
+    <string name="father_page">This is the father page</string>
 </resources>

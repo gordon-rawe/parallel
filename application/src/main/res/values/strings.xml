@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Parallel</string>
+    <string name="this_is_the_home_page">This is the home page!</string>
 </resources>

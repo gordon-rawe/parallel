@@ -8,7 +8,7 @@ ext{
 parallelOptions {
     enabled = parallelEnabled
     moduleConfigFilePath = "$rootDir/apk_module_config.xml"
-    jarSigner = "/Library/Java/JavaVirtualMachines/jdk1.8.0_73.jdk/Contents/Home/bin/jarsigner"
+    jarSigner = "/Library/java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/bin/jarsigner"
 }
 
 buildscript {
