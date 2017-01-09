@@ -32,12 +32,11 @@ public final class Framework {
 
     public static final String SYMBOL_SEMICOLON = ";";
 
-    private static String BASEDIR;
-    static String STORAGE_LOCATION;
+    private static String STORAGE_LOCATION;
     static final Map<String, Bundle> bundles;
 
     private static long nextBundleID;
-    static Properties properties;
+    private static Properties properties;
 
     static {
         log = LoggerFactory.getLogcatLogger("Framework");
@@ -58,7 +57,7 @@ public final class Framework {
 
         long currentTimeMillis = System.currentTimeMillis();
         launch();
-        boolean bundleInitialized = true;//BundlePreference.getInstance().getBoolean(Environments.BUNDLE_INSTALL_STATUS, false);
+        boolean bundleInitialized = BundlePreference.getInstance().getBoolean(Environments.BUNDLE_INSTALL_STATUS, false);
         if (bundleInitialized) {
             File file = new File(STORAGE_LOCATION);
             if (file.exists()) {

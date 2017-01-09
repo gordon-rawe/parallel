@@ -96,6 +96,7 @@ public class BundleInitializer {
 
     private static boolean processLibsBundle(ZipFile zipFile, String str) {
         String packageNameFromEntryName = getPackageNameFromEntryName(str);
+        Log.e("---x",packageNameFromEntryName);
         if (BundleCore.getInstance().getBundle(packageNameFromEntryName) == null) {
             try {
                 BundleCore.getInstance().installBundle(packageNameFromEntryName, zipFile.getInputStream(zipFile.getEntry(str)));
