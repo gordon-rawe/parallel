@@ -20,6 +20,7 @@ public class Environments {
     public static final String HOT_PATCH_DIR = "hot_patch";
     public static final String KEY_WELCOME_PAGE = "ctrip.android.bundle.welcome";
     public static final String WELCOME_PAGE = "ctrip.android.view.home.CtripSplashActivity";
+    public static final String LOCATION_DIR = "storage";
 
     public static String buildBundleKey(Context context) throws PackageManager.NameNotFoundException {
         PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_CONFIGURATIONS);

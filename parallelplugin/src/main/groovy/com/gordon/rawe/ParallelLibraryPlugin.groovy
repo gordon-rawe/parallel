@@ -318,7 +318,7 @@ public class ParallelLibraryPlugin implements Plugin<Project> {
         if (!libDir.exists()) libDir.mkdirs()
         proGuard.injars(project.fileTree(libraryOptions.libsDirPath).include('*.jar'))
         proGuard.outjars("$project.buildDir/intermediates/classes-obfuscated/classes-obfuscated.jar")
-
+        proGuard.printmapping project.file("$ParallelSharedOptions.reference.buildOutputPath/$libraryOptions.soName-mapping.txt")
         proGuard.configuration(libraryOptions.moduleProguardRulesFilePath)
         proGuard.configuration("$project.buildDir/intermediates/res/aapt-rules.txt")
 
