@@ -1,0 +1,95 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
+/**
+ * Configuration area
+ * */
+def projectName = "parallel"
+def mavenDesc = "This is a android gradle plugin written in groovy to fast package project source code into acdd archtecture. if you are interested, welcome to my github."
+def baseUrl = 'https://github.com/gordon-rawe'
+def siteUrl = baseUrl
+def gitUrl = "${baseUrl}/parallel"
+def issueUrl = "${baseUrl}/parallel"
+
+def licenseIds = ['Apache-2.0']
+def licenseNames = ['The Apache Software License, Version 2.0']
+def licenseUrls = ['http://www.apache.org/licenses/LICENSE-2.0.txt']
+def inception = '2016'
+
+def username = 'gordon-rawe'
+
+def group = "com.gordon.rawe"
+def artifact = "parallel"
+def versionId = "1.0.0-beta"
+
+install {
+    repositories {
+        mavenInstaller {
+            pom.project {
+                // Description
+                name = projectName
+                description = mavenDesc
+                url = siteUrl
+
+                // Archive
+                groupId = group
+                artifactId = artifact
+                version = versionId
+
+                // License
+                inceptionYear = inception
+                licenses {
+                    licenseNames.eachWithIndex { ln, li ->
+                        license {
+                            name = ln
+                            url = licenseUrls[li]
+                        }
+                    }
+                }
+                developers {
+                    developer {
+                        name = username
+                    }
+                }
+                scm {
+                    connection = gitUrl
+                    developerConnection = gitUrl
+                    url = siteUrl
+                }
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allGroovy
+    classifier = 'sources'
+}
+
+
+task javadocJar(type: Jar, dependsOn: groovydoc) {
+    from groovydoc.getDestinationDir()
+    classifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar,sourcesJar
+}
+
+bintray {
+    user = "gordon-rawe"
+    key = "bdb7c87e73f4274b0907785435a019923ac62057"
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        name = projectName
+        desc = mavenDesc
+        websiteUrl = siteUrl
+        issueTrackerUrl = issueUrl
+        vcsUrl = gitUrl
+        labels = ['acdd framework', 'parallel structure', 'package scripts']
+        licenses = licenseIds
+        publish = true
+        publicDownloadNumbers = true
+    }
+}

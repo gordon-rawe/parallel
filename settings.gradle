@@ -1,4 +1,4 @@
-def toggle = "project"//["project","plugin","bsd"]
+def toggle = "plugin"//["project","plugin","bsd"]
 
 if ("project".equals(toggle)) {
     include ':application', ':sharedlibs', ':hierachy:father', ':hierachy:daughter', ':hierachy:son', ':flat'
