@@ -8,7 +8,13 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/bsdpatch" />
+            <option value="$PROJECT_DIR$/application" />
+            <option value="$PROJECT_DIR$/flat" />
+            <option value="$PROJECT_DIR$/hierachy" />
+            <option value="$PROJECT_DIR$/hierachy/daughter" />
+            <option value="$PROJECT_DIR$/hierachy/father" />
+            <option value="$PROJECT_DIR$/hierachy/son" />
+            <option value="$PROJECT_DIR$/sharedlibs" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
