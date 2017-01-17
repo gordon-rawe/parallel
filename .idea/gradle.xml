@@ -8,7 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/parallelplugin" />
+            <option value="$PROJECT_DIR$/parallel" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

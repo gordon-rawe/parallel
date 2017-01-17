@@ -3,7 +3,7 @@ def toggle = "plugin"//["project","plugin","bsd"]
 if ("project".equals(toggle)) {
     include ':application', ':sharedlibs', ':hierachy:father', ':hierachy:daughter', ':hierachy:son', ':flat'
 } else if ("plugin".equals(toggle)) {
-    include ':parallelplugin'
+    include ':parallel'
 } else if ("bsd".equals(toggle)) {
     include ':bsdpatch'
 }

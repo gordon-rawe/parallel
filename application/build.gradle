@@ -1,15 +1,6 @@
 apply plugin: 'com.android.application'
-apply plugin: 'parallel.application'
-
-applicationOptions {
-    packageName = "com.gordon.rawe.parallel"
-    keystore = "$rootDir/release.keystore"
-    keyAlias = "gordon"
-    keyPassword = "gordon"
-    storePassword = "gordon"
-}
-
 android {
+
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -40,11 +31,4 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:25.1.0'
-    compile project(":sharedlibs")
-    if (!parallelEnabled) {
-        compile project(":hierachy:father")
-        compile project(":hierachy:son")
-        compile project(":hierachy:daughter")
-        compile project(":flat")
-    }
 }
