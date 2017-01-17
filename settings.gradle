@@ -1,5 +1,9 @@
-if (true) {
+def toggle = "bsd"//["project","plugin","bsd"]
+
+if ("project".equals(toggle)) {
     include ':application', ':sharedlibs', ':hierachy:father', ':hierachy:daughter', ':hierachy:son', ':flat'
-} else {
+} else if ("plugin".equals(toggle)) {
     include ':parallelplugin'
+} else if ("bsd".equals(toggle)) {
+    include ':bsdpatch'
 }

@@ -40,7 +40,7 @@ public class ParallelSharedOptions {
 
     /** optional */
     public boolean enabled = true;
-    public int targetSdkVersion = Default.DEFAULT_TARGET_SDK_VERSION//23(Android 6.0) 以下 不需要权限申请
+    public int targetSdkVersion = Default.DEFAULT_TARGET_SDK_VERSION//23(Android bzip2.0) 以下 不需要权限申请
     public String buildToolsVersion = Default.DEFAULT_BUILD_TOOLS_VERSION
     public String supportLibraryVersion = Default.DEFAULT_SUPPORT_LIB_VERSION
     public String javaCompileVersion = Default.DEFAULT_JAVA_COMPILE_VERSION
